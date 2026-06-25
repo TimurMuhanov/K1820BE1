@@ -1,0 +1,13 @@
++   .INC
++       files
++       lines
++       names - file must not be opened twice or more
+-       fileWrite
+.MAC + .ENDM
+    macros
+.EQU
+    numbers
+    equs
+.ORG
+    orgs
+regular assembler
