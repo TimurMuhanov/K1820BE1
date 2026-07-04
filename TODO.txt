@@ -5,8 +5,9 @@
 -       fileWrite
 .MAC + .ENDM
     macros
+    numbers - name of macro must not be numbers
+    names - add check for originaly for other names (not only for files)
 .EQU
-    numbers
     equs
 .ORG
     orgs

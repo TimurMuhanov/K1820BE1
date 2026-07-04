@@ -1,0 +1,5 @@
+A
+.MAC NAME_OTHER_FILE
+A
+.ENDM
+B

@@ -5,6 +5,6 @@ void namesInit(void);
 
 int namesAdd(char *c);
 
-void namesClear(void);
+void namesClean(void);
 
 #endif /* __NAMES_H__ */

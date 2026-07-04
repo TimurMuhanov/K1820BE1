@@ -1,0 +1,5 @@
+A
+.MAC NAME2
+A
+.ENDM
+B

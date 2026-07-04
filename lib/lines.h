@@ -1,25 +1,36 @@
 #ifndef __LINES_H__
 #define __LINES_H__ 1
 
-#define LINES_SIZE 128
+#include <stdint.h>
+
+#define LINES_SIZE 64
+#define FILENAME_SIZE 32
 
 struct lines_t {
-    char filename[LINES_SIZE];
     char line[LINES_SIZE];
-    char com[LINES_SIZE];
-    char label[LINES_SIZE];
-    int line_count, line_start, line_end;
+    char filename[FILENAME_SIZE];
+    int8_t labelS,labelE,word1S,word1E,commentS,szcmd;
+    int16_t numCmd;
+    uint32_t cmd;
+    uint16_t numLine,address;
+    struct lines_t *nall;
     struct lines_t *next;
-    struct lines_t *prev;
 };
 
 void linesInit(void);
-int linesPushBack(struct lines_t *ln);
-void linesClear(void);
+struct lines_t* linesPushBack(struct lines_t *ln);
+void linesClean(void);
 void linesPrint(void);
+void linesPrint4asm(void);
 void linesCutComment(struct lines_t *ln);
+void linesHighCase(struct lines_t *ln);
 void linesCutLabel(struct lines_t *ln);
-// @return 1 - found, 0 - not
-int linesGetWord(struct lines_t *ln, int n, char *cout);
+void linesFindFirstWord(struct lines_t *ln);
+void linesGetFirstWord(struct lines_t *ln, char *w, uint8_t *n);
+void linesGetArg(struct lines_t *ln, uint8_t n, char *w, uint8_t *sz);
+struct lines_t* linesGetHead(void);
+struct lines_t* linesGetNALL(void);
+struct lines_t* linesGetNext(void);
+struct lines_t* linesInsert(struct lines_t *afterIt, struct lines_t *data);
 
 #endif /* __LINES_H__ */

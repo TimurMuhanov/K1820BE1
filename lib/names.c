@@ -35,7 +35,7 @@ int namesAdd(char *c) {
     return 0;
 }
 
-void namesClear(void) {
+void namesClean(void) {
     struct names_t *nm = __names_global;
     while (nm != NULL) {
         __names_global = nm->next;
