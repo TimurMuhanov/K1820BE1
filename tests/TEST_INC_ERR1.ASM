@@ -3,5 +3,5 @@
 AA
 B
 
-.INC test_inc1.asm
+.INC test_inc1.asm ; double included
 C

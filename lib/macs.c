@@ -3,6 +3,7 @@
 #include "names.h"
 #include <stdlib.h>
 #include <string.h>
+#include "numbers.h"
 
 struct macs_t *__macHead;
 struct macs_t *__macTail;
@@ -13,13 +14,19 @@ void macInit(void) {
 }
 
 int macAdd(struct lines_t *ln) {
-    char name[LINES_SIZE];
+    char *name;
     uint8_t nsz;
-    linesGetArg(ln,1,name,&nsz);
-    // check for not integer name !!!
-    if (namesAdd(name)) {
-        printf("ERROR: MACRO <%s> already exist\r\n",name);
+    int tmpi;
+    linesGetArgs(ln,&name,&nsz);
+    char name_for_add[LINES_SIZE];
+    strncpy(name_for_add,name,nsz);
+    if (!numberTryGet(name,nsz,&tmpi,(fun_num_t)numberVoid)) {
+        printf("ERROR: MACRO <%s> it is number %d\r\n",name,tmpi);
         return 1;
+    }
+    if (nameAdd(name_for_add,nsz)) {
+        printf("ERROR: MACRO <%s> already exist\r\n",name);
+        return 2;
     }
     struct macs_t *tmp = (struct macs_t*)malloc(sizeof(struct macs_t));
     tmp->line = ln;
@@ -46,7 +53,7 @@ void macClean(void) {
 int macCutFromAsm(void) {
     struct macs_t *mc = __macHead;
     struct lines_t *ln,*lnt;
-    char fw[LINES_SIZE];
+    char *fw;
     uint8_t fws;
     while (mc != NULL) {
         mc->line->szcmd = 0;
@@ -57,7 +64,7 @@ int macCutFromAsm(void) {
         while (flag_find_endm) {
             lnt = lnt->next;
             if (lnt != NULL) {
-                linesGetFirstWord(lnt,fw,&fws);
+                linesGetFirstWord(lnt,&fw,&fws);
                 // printf("MACRO first word is %s\r\n",fw);
                 if ((fws==5) && (strncmp(fw,".ENDM",fws) == 0)) {
                     flag_find_endm = 0;
@@ -79,14 +86,14 @@ int macCutFromAsm(void) {
 }
 
 int macAddToAsm(void) {
-    char fw[LINES_SIZE],fwm[LINES_SIZE];
+    char *fw,*fwm;
     uint8_t fws,fwms;
     struct lines_t *ln = linesGetHead();
     struct lines_t *lnt = linesGetNALL();
     while (ln != NULL) {
         if (!(ln->szcmd)) { ln = ln->next; continue; }
         printf("line is %s\r\n",ln->line);
-        linesGetFirstWord(ln,fw,&fws);
+        linesGetFirstWord(ln,&fw,&fws);
         if ((fws==5) && (strncmp(fw,".ENDM",fws) == 0) && (ln->szcmd != 0)) {
             printf("ERROR: <%s>[%d] ENDM without MACRO\r\n",ln->filename,ln->numLine);
             return 1;
@@ -95,7 +102,7 @@ int macAddToAsm(void) {
         struct macs_t *mc = __macHead;
         int macro_find=1;
         while (macro_find && (mc!= NULL)) {
-            linesGetArg(mc->line,1,fwm,&fwms);
+            linesGetArgs(mc->line,&fwm,&fwms);
             if (fwms == fws) {
                 if (strncmp(fw,fwm,fws)==0) {
                     printf("it is macro inserting %s\r\n",fwm);

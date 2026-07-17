@@ -35,6 +35,7 @@ struct lines_t* linesPushBack(struct lines_t *ln) {
     linesHighCase(tmp);
     linesCutLabel(tmp);
     linesFindFirstWord(tmp);
+    linesFindArgs(tmp);
     if (__lines_global.head == NULL) {
         __lines_global.head = tmp;
         __lines_global.nall = tmp;
@@ -90,14 +91,15 @@ void linesHighCase(struct lines_t *ln) {
     }
 }
 
-void linesCutLabel(struct lines_t *ln) {
+int linesCutLabel(struct lines_t *ln) {
     int i=0, n=ln->commentS;
     while ((i<n) && (ln->line[i] != ':')) { i++; }
     if (i<n) {
         int j=0, k=i;
         int err = labelAdd(ln,&j,&k);
         if (err) {
-            printf("linesCutLabel Error\r\n");
+            printf("error labelAdd %d\r\n",err);
+            return 1;
         } else {
             ln->word1S = i+1;
             ln->labelS = j;
@@ -108,6 +110,7 @@ void linesCutLabel(struct lines_t *ln) {
         ln->labelS = 0;
         ln->labelE = 0;
     }
+    return 0;
 }
 
 int linesSkipSpaces(char *c, int s, int n) {
@@ -136,27 +139,34 @@ void linesFindFirstWord(struct lines_t *ln) {
     ln->word1E = b;
 }
 
-void linesGetFirstWord(struct lines_t *ln, char *w, uint8_t *n) {
+void linesGetFirstWord(struct lines_t *ln, char **w, uint8_t *n) {
+    *w = &(ln->line[ln->word1S]);
     *n = ln->word1E - ln->word1S;
-    strncpy(w,ln->line+ln->word1S, *n);
-    w[*n]=0;
 }
 
-void linesGetArg(struct lines_t *ln, uint8_t n, char *w, uint8_t *sz) {
-    int k=n, a, b=ln->word1E;
-    // printf("full line : [%s]\r\n",ln->line);
-    while (k) {
-        a = linesSkipSpaces(ln->line, b, ln->commentS);
-        b = linesSkipSymbols(ln->line, a, ln->commentS);
-        // char t2[LINES_SIZE];
-        // strncpy(t2,ln->line+a,b-a); t2[b-a]=0; printf("found word : [%s] a=%d b=%d\r\n",t2,a,b);
-        k--;
+void linesFindArgs(struct lines_t *ln) {
+    int i=ln->word1E+1; // skip 1st space
+    int j=i;
+    int k=-1;
+    int m=0;
+    while (i<ln->commentS) {
+        if ((ln->line[i]==' ') || (ln->line[i]=='\t')) {
+            i++;
+        } else {
+            if (k == -1) { k = j; }
+            if (i!=j) { ln->line[j] = ln->line[i]; }
+            i++;
+            j++;
+            m++;
+        }
     }
-    if (b>a) {
-        strncpy(w,ln->line+a,b-a);
-        w[b-a]=0;
-    }
-    *sz = b-a;
+    ln->argS = k;
+    ln->argE = k+m;
+}
+
+void linesGetArgs(struct lines_t *ln, char **w, uint8_t *sz) {
+    *w = &(ln->line[ln->argS]);
+    *sz = ln->argE - ln->argS;
 }
 
 struct lines_t* linesGetHead(void) {

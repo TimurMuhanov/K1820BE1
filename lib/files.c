@@ -6,8 +6,12 @@
 #include "equs.h"
 #include "orgs.h"
 
-int fileRecursive(char *filename) {
-    if (namesAdd(filename)) {
+int fileRecursive(char *fn, int fn_sz) {
+    if (fn_sz >= FILENAME_SIZE) { printf("filename too long\r\n"); return 11; }
+    char filename[FILENAME_SIZE];
+    strncpy(filename,fn,fn_sz);
+    filename[fn_sz] = 0;
+    if (nameAdd(filename,strlen(filename))) {
         printf("ERROR : <%s> - this file open already\r\n",filename);
         return 1;
     }
@@ -19,8 +23,8 @@ int fileRecursive(char *filename) {
     }
     // printf("file %s was opened successfully\r\n",filename);
     char line[LINES_SIZE];
-    char tmp_word[LINES_SIZE];
-    char tmp_arg[LINES_SIZE];
+    char *tmp_word;
+    char *tmp_arg;
     int line_count=1;
     uint8_t tmp_word_len,tmp_arg_len;
     while (fgets(line, sizeof(line), f) != NULL) {
@@ -31,14 +35,14 @@ int fileRecursive(char *filename) {
         strcpy(tmp_line.line,line);
         tmp_line.numLine = line_count;
         struct lines_t *tmp_real = linesPushBack(&tmp_line);
-        linesGetFirstWord(tmp_real,tmp_word,&tmp_word_len);
-        linesGetArg(tmp_real,1,tmp_arg,&tmp_arg_len);
+        linesGetFirstWord(tmp_real,&tmp_word,&tmp_word_len);
+        linesGetArgs(tmp_real,&tmp_arg,&tmp_arg_len);
         // printf("line is %d \"%s\", 1st word=%s, arg=%s [%d]\r\n",line_count,line,tmp_word,tmp_arg,tmp_arg_len);
         if (tmp_word_len) {
             if ((tmp_word_len == 4) && (strncmp(tmp_word,".INC", tmp_word_len) == 0)) {
                 if (tmp_arg_len) {
                     // printf("open file : %s ...\r\n",tmp_word);
-                    if (fileRecursive(tmp_arg)) {
+                    if (fileRecursive(tmp_arg,tmp_arg_len)) {
                         printf("ERROR : <%s>[%d] - in include file\r\n",filename,line_count);
                         return 3;
                     } else {
@@ -62,9 +66,12 @@ int fileRecursive(char *filename) {
             }
             if ((tmp_word_len == 4) && (strncmp(tmp_word,".EQU", tmp_word_len) == 0)) {
                 if (tmp_arg_len) {
-                    equAdd(tmp_real);
+                    if (equAdd(tmp_real)) {
+                        printf("ERROR : <%s>[%d]\r\n",filename,line_count);
+                        return 7;
+                    }
                 } else {
-                    printf("ERROR : <%s>[%d] - .EQU without name\r\n",filename,line_count);
+                    printf("ERROR : <%s>[%d] - .EQU without args\r\n",filename,line_count);
                     return 8;
                 }
             }
@@ -84,18 +91,14 @@ int fileRecursive(char *filename) {
 }
 
 int filesRead(char *filename) {
-    linesInit();
-    namesInit();
-    macInit();
-    equInit();
-    orgInit();
-    if (fileRecursive(filename)) {
-        namesClean();
+    int sz = strlen(filename);
+    if (fileRecursive(filename,sz)) {
+        nameClean();
         printf("ERROR : <%s> - in include file\r\n",filename);
         return 1;
     }
     // printf("files was opened successfully\r\n");
-    namesClean();
+    nameClean();
     return 0;
 }
 

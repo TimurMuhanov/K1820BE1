@@ -1,10 +1,13 @@
 #ifndef __NAMES_H__
 #define __NAMES_H__ 1
 
-void namesInit(void);
+void nameInit(void);
 
-int namesAdd(char *c);
+int nameAdd(char *c, int sz);
 
-void namesClean(void);
+void nameClean(void);
+
+// @return 0 - ok
+int nameRightFormat(char *c, int sz);
 
 #endif /* __NAMES_H__ */

@@ -9,7 +9,7 @@
 struct lines_t {
     char line[LINES_SIZE];
     char filename[FILENAME_SIZE];
-    int8_t labelS,labelE,word1S,word1E,commentS,szcmd;
+    int8_t labelS,labelE,word1S,word1E,commentS,argS,argE,szcmd;
     int16_t numCmd;
     uint32_t cmd;
     uint16_t numLine,address;
@@ -24,10 +24,11 @@ void linesPrint(void);
 void linesPrint4asm(void);
 void linesCutComment(struct lines_t *ln);
 void linesHighCase(struct lines_t *ln);
-void linesCutLabel(struct lines_t *ln);
+int linesCutLabel(struct lines_t *ln);
 void linesFindFirstWord(struct lines_t *ln);
-void linesGetFirstWord(struct lines_t *ln, char *w, uint8_t *n);
-void linesGetArg(struct lines_t *ln, uint8_t n, char *w, uint8_t *sz);
+void linesGetFirstWord(struct lines_t *ln, char **w, uint8_t *n);
+void linesFindArgs(struct lines_t *ln);
+void linesGetArgs(struct lines_t *ln, char **w, uint8_t *sz);
 struct lines_t* linesGetHead(void);
 struct lines_t* linesGetNALL(void);
 struct lines_t* linesGetNext(void);
