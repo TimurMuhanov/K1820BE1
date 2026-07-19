@@ -1,3 +1,3 @@
-AA
-BB
-CCCC
+XOR
+XOR
+XOR

@@ -140,3 +140,31 @@ void equClean(void) {
         eq = tmp;
     }
 }
+
+int equGet(char *c, int sz, int *ret) {
+    struct equs_t *eq = __equ_global_head;
+    int err;
+    while (eq != NULL) {
+        int n = eq->name_sz;
+        if ((n==sz) && (strncmp(eq->name,c,n) == 0)) {
+            if (eq->ready == __EQU_READY) { *ret = eq->number; return 0; }
+        }
+        eq = eq->next;
+    }
+    return 1;
+}
+
+void equPrint(void) {
+    struct equs_t *eq = __equ_global_head;
+    while (eq != NULL) {
+        for (int i=0; i<eq->name_sz; i++) {
+            printf("%c",eq->name[i]);
+        }
+        if (eq->ready) {
+            printf(" = %d\r\n",eq->number);
+        } else {
+            printf(" = ???\r\n");
+        }
+        eq = eq->next;
+    }
+}

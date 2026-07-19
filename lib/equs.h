@@ -13,7 +13,8 @@ int equResolver(void);
 
 void equClean(void);
 
-// @return 1 - found, 0 - not found
-void equGetNumber(char *name, int st, int se, int *number);
+int equGet(char *c, int sz, int *ret);
+
+void equPrint(void);
 
 #endif /* __EQUS_H__ */

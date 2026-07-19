@@ -2,17 +2,21 @@
 
 cd tests
 
-printf "include test [1]: include without name ...........\t"
+printf "empty test [1]: if no error ......................\t"
+[ $(./K1820BE1 TEST_EMPTY_OK.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
+    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
+
+printf "include test [1]: if no error ....................\t"
+[ $(./K1820BE1 TEST_INC_OK.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
+    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
+printf "include test [2]: include without name ...........\t"
 [ $(./K1820BE1 TEST_INC_ERR2.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
-printf "include test [2]: include file which not exist ...\t"
+printf "include test [3]: include file which not exist ...\t"
 [ $(./K1820BE1 TEST_INC_ERR3.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
-printf "include test [3]: one file included twice ........\t"
+printf "include test [4]: one file included twice ........\t"
 [ $(./K1820BE1 TEST_INC_ERR1.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
-    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
-printf "include test [4]: if no error ....................\t"
-[ $(./K1820BE1 TEST_INC_OK.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
 
 printf "macros test [1]: if no error .........................\t"
@@ -99,6 +103,16 @@ printf "equal test [19]: wrong definision 8 ..........\t"
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
 printf "equal test [20]: wrong definision 9 ..........\t"
 [ $(./K1820BE1 TEST_EQU_ERR20.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
+    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
+
+printf "all test [ 1]: if no error ...\t"
+[ $(./K1820BE1 TEST_ALL_OK1.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
+    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
+printf "all test [ 2]: if no error ...\t"
+[ $(./K1820BE1 TEST_ALL_OK2.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
+    && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
+printf "all test [ 3]: empty equal ...\t"
+[ $(./K1820BE1 TEST_ALL_ERR1.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
 
 cd -

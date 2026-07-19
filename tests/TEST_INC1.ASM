@@ -1,4 +1,4 @@
-AA
-BB
+ASC
+ASC
 .INC test_inc3.asm
-CCCC
+ASC

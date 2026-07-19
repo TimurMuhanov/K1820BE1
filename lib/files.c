@@ -5,6 +5,7 @@
 #include "macs.h"
 #include "equs.h"
 #include "orgs.h"
+#include <stdlib.h>
 
 int fileRecursive(char *fn, int fn_sz) {
     if (fn_sz >= FILENAME_SIZE) { printf("filename too long\r\n"); return 11; }
@@ -102,6 +103,85 @@ int filesRead(char *filename) {
     return 0;
 }
 
-int fileWrite(void) {
-    printf("fileWrite does not work yet\r\n");
+struct files_t {
+    int adr;
+    int data;
+    int size;
+    struct files_t *next;
+};
+
+int fileWrite(char *filename) {
+    struct files_t *fhead = NULL,*ftmp,*fsearch;
+    struct lines_t *ln = linesGetHead();
+    int err=0;
+    while (ln != NULL) {
+        if (ln->szcmd > 0) {
+            ftmp = (struct files_t*)malloc(sizeof(struct files_t));
+            if (ftmp == NULL) {
+                err=1;
+                break;
+            }
+            ftmp->adr = ln->address;
+            ftmp->data = ln->cmd;
+            ftmp->size = ln->szcmd;
+            ftmp->next = NULL;
+            if (fhead == NULL) {
+                fhead = ftmp;
+            } else {
+                fsearch = fhead;
+                while ((fsearch->next != NULL) && (fsearch->next->adr < ftmp->adr)) {
+                    fsearch = fsearch->next;
+                }
+                if (fsearch->next == NULL) {
+                    fsearch->next = ftmp;
+                } else {
+                    ftmp->next = fsearch->next;
+                    fsearch->next = ftmp;
+                }
+            }
+        }
+        ln = ln->next;
+    }
+    // print and check error
+    if (!err) {
+        fsearch = fhead;
+        while (fsearch != NULL) {
+            printf("%03x:%d:%04x\r\n",fsearch->adr,fsearch->size,fsearch->data);
+            if (fsearch->next != NULL) {
+                if (fsearch->adr + fsearch->size > fsearch->next->adr) {
+                    printf("ERROR : fileWrite %d + %d > %d\r\n",fsearch->adr, fsearch->size, fsearch->next->adr);
+                    err = 2;
+                    break;
+                }
+            }
+            fsearch = fsearch->next;
+        }
+    }
+    // write to file
+    if (!err) {
+        FILE *f = fopen(filename,"wb");
+        if (f == NULL) {
+            err=3;
+        } else {
+            fsearch = fhead;
+            while (fsearch != NULL) {
+                while (fsearch->size) {
+                    fseek(f,fsearch->adr,SEEK_SET);
+                    fsearch->size--;
+                    fprintf(f,"%c",((fsearch->data)>>(8*(fsearch->size)))&0xff);
+                    fsearch->adr++;
+                }
+                fsearch = fsearch->next;
+            }
+            fclose(f);
+        }
+    }
+    // clean
+    fsearch = fhead;
+    while (fsearch != NULL) {
+        ftmp = fsearch;
+        fsearch = fsearch->next;
+        free(ftmp);
+    }
+    return err;
 }

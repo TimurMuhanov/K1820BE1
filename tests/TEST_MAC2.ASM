@@ -1,5 +1,5 @@
-A
+ASC
 .MAC NAME2
-A
+ASC
 .ENDM
-B
+ASC

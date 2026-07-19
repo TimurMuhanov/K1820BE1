@@ -1,21 +1,15 @@
-+   .INC
-+       files
-+       lines
-+       names - file must not be opened twice or more
--       fileWrite
-+.MAC + .ENDM
-+   macros
-+   numbers - name of macro must not be numbers
-+   names - add check for originaly for other names (not only for files)
--   rewrite labels - if it contains in macro
-+.EQU
-+   equs
-+   names - name in right format (only a-z, 0-9, _ and not in number formats)
--   supported chars
-.ORG
-    orgs
-.DB + .DW
-    constants - save in program space constants 
-.BYTE
-    bytes - reserve space for bytes in ram
-regular assembler
+~equs: supported chars
++files
++labels
++lines
+~macs: rewrite labels - if it contains in macro
++names
+~numbers: see equs
++orgs
+reserves:
+    .DB + .DW
+        constants - save in program space constants 
+    .BYTE
+        bytes - reserve space for bytes in ram
+assemblers:
+    ~K1820BE1: add check for illegal instruction

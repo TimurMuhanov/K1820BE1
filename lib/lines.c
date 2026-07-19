@@ -31,6 +31,7 @@ struct lines_t* linesPushBack(struct lines_t *ln) {
     tmp->next = NULL;
     tmp->nall = NULL;
     tmp->szcmd = -1 ; // not ready
+    tmp->address = -1;
     linesCutComment(tmp);
     linesHighCase(tmp);
     linesCutLabel(tmp);
@@ -62,7 +63,7 @@ void linesClean(void) {
 void linesPrint(void) {
     struct lines_t *x = __lines_global.head;
     while (x != NULL) {
-        printf("<%s> [%d] {%d} \"%s\"\r\n",x->filename,x->numLine,x->szcmd,x->line);
+        printf("<%s> [%d] {%d} (%03x:%04x) \"%s\"\r\n",x->filename,x->numLine,x->szcmd,x->address,x->cmd,x->line);
         x = x->nall;
     }
 }
@@ -71,7 +72,7 @@ void linesPrint4asm(void) {
     struct lines_t *x = __lines_global.head;
     while (x != NULL) {
         if (x->szcmd) {
-            printf("<%s> [%d] {%d} \"%s\"\r\n",x->filename,x->numLine,x->szcmd,x->line);
+            printf("<%s> [%d] {%d} (%03x:%04x) \"%s\"\r\n",x->filename,x->numLine,x->szcmd,x->address,x->cmd,x->line);
         }
         x = x->next;
     }
@@ -96,7 +97,7 @@ int linesCutLabel(struct lines_t *ln) {
     while ((i<n) && (ln->line[i] != ':')) { i++; }
     if (i<n) {
         int j=0, k=i;
-        int err = labelAdd(ln,&j,&k);
+        int err = labelAdd(ln);
         if (err) {
             printf("error labelAdd %d\r\n",err);
             return 1;
@@ -193,6 +194,16 @@ struct lines_t* linesInsert(struct lines_t *afterIt, struct lines_t *data) {
     tmp->next = afterIt->next;
     tmp->nall = NULL;
     tmp->szcmd = -1 ; // not ready
+    tmp->address=-1;
+    tmp->argE = data->argE;
+    tmp->argS = data->argS;
+    tmp->cmd = data->cmd;
+    tmp->commentS = data->commentS;
+    tmp->labelE = data->labelE;
+    tmp->labelS = data->labelS;
+    tmp->numCmd = data->numCmd;
+    tmp->word1E = data->word1E;
+    tmp->word1S = data->word1S;
     afterIt->next = tmp;
     __lines_global.nall->nall = tmp;
     __lines_global.nall = tmp;

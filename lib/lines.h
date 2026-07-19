@@ -12,7 +12,7 @@ struct lines_t {
     int8_t labelS,labelE,word1S,word1E,commentS,argS,argE,szcmd;
     int16_t numCmd;
     uint32_t cmd;
-    uint16_t numLine,address;
+    int16_t numLine,address;
     struct lines_t *nall;
     struct lines_t *next;
 };

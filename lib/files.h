@@ -5,6 +5,6 @@
 
 int filesRead(char *filename);
 
-int fileWrite(void);
+int fileWrite(char *filename);
 
 #endif /* __FILES_H__ */

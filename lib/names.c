@@ -29,12 +29,12 @@ int nameCheckExist(char *c, int sz) {
 }
 
 int nameRightFormat(char *c, int sz) {
-    printf("\t\"%c\"\t",c[0]);
+    // printf("\t\"%c\"\t",c[0]);
     if (!(((c[0] >= 'A') && (c[0]<='Z')) || (c[0] == '_'))) {
         return 1;
     }
     for (int i=1; i<sz; i++) {
-        printf("%c",c[i]);
+        // printf("%c",c[i]);
         if (!(((c[i] >= 'A') && (c[i] <= 'Z')) || \
               ((c[i] >= '0') && (c[i] <= '9')) || \
                (c[i] == '_') || (c[i] == '.'))) {

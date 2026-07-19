@@ -1,10 +1,16 @@
-#ifndef __EQUS_H__
-#define __EQUS_H__ 1
+#ifndef __LABELS_H__
+#define __LABELS_H__ 1
 
 #include "lines.h"
 
 void labelInit(void);
 
-int labelAdd(struct lines_t *ln, int *a, int *b);
+int labelAdd(struct lines_t *ln);
 
-#endif /* __EQUS_H__ */
+void labelClean(void);
+
+int labelGet(char *c, int sz, int *ret);
+
+void labelPrint(void);
+
+#endif /* __LABELS_H__ */
