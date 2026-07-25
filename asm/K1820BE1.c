@@ -72,13 +72,13 @@ const struct K1820BE1_t K1820BE1_instructions[] = {
     { .name = "INIL",  .code = 0x29, .high=0x33, .mask=0,     .op=0   }, // 55
     { .name = "INL",   .code = 0x2e, .high=0x33, .mask=0,     .op=0   }, // 56
     { .name = "OBD",   .code = 0x3e, .high=0x33, .mask=0,     .op=0   }, // 57
-    { .name = "OGI",   .code = 0x50, .high=0x33, .mask=0,     .op=0   }, // 58
+    { .name = "OGI",   .code = 0x50, .high=0x33, .mask=0xf,   .op='y' }, // 58
     { .name = "OMG",   .code = 0x3a, .high=0x33, .mask=0,     .op=0   }, // 59
     { .name = "XAS",   .code = 0x4f, .high=0x0,  .mask=0,     .op=0   }  // 60
 };
 
 int K1820BE1DecodeInstruction(struct lines_t *ln) {
-    printf("info : asm (1) \"%s\"\r\n",ln->line);
+    printf("info : asm (1) [line N %d]\"%s\"\r\n",ln->numLine,ln->line);
     int n=sizeof(K1820BE1_instructions)/sizeof(struct K1820BE1_t);
     int i=0, sz=(ln->word1E - ln->word1S);
     char *c = ln->line + ln->word1S;
@@ -134,6 +134,7 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
             if (i == 13) { // JP
                 if ((ln->address < 0x80) || (ln->address >= 0x100)) {
                     mask >>= 1;
+                    ln->cmd |= 0x40;
                 }
                 if ((arg1&(~mask)) != (ln->address&(~mask))) {
                     return 8;

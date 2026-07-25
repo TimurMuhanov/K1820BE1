@@ -76,6 +76,7 @@ int main(int argc, char* argv[]) {
     err = asmAssembly(K1820BE1DecodeInstruction);
     if (err) {
         printf("ERROR: in assembly\r\n");
+    labelPrint();
         linesClean();
         macClean();
         nameClean();

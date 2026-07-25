@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define LINES_SIZE 64
+#define LINES_SIZE 128
 #define FILENAME_SIZE 32
 
 struct lines_t {

@@ -13,3 +13,6 @@ reserves:
         bytes - reserve space for bytes in ram
 assemblers:
     ~K1820BE1: add check for illegal instruction
+rewrite:
+    read file to buffer with fixed size
+    labels: char[] -> char*
