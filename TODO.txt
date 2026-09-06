@@ -1,18 +1,11 @@
 ~equs: supported chars
-+files
-+labels
-+lines
 ~macs: rewrite labels - if it contains in macro
-+names
 ~numbers: see equs
-+orgs
 reserves:
     .DB + .DW
         constants - save in program space constants 
     .BYTE
         bytes - reserve space for bytes in ram
-assemblers:
-    ~K1820BE1: add check for illegal instruction
 rewrite:
     read file to buffer with fixed size
     labels: char[] -> char*

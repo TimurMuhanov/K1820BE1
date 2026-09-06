@@ -60,6 +60,18 @@ int main(int argc, char* argv[]) {
         orgClean();
         return err;
     }
+    err = asmAssembly(K1820BE1DecodeInstruction);
+    if (err) {
+        printf("ERROR: in assembly\r\n");
+    labelPrint();
+        linesClean();
+        macClean();
+        nameClean();
+        equClean();
+        labelClean();
+        orgClean();
+        return err;
+    }
     char name_output[128];
     int name_size=strlen(argv[1]);
     sprintf(name_output,"%s",argv[1]);
@@ -73,18 +85,6 @@ int main(int argc, char* argv[]) {
     printf("******************************************* print labels\r\n");
     labelPrint();
     printf("*******************************************\r\n");
-    err = asmAssembly(K1820BE1DecodeInstruction);
-    if (err) {
-        printf("ERROR: in assembly\r\n");
-    labelPrint();
-        linesClean();
-        macClean();
-        nameClean();
-        equClean();
-        labelClean();
-        orgClean();
-        return err;
-    }
     err = fileWrite(name_output);
     if (err) {
         printf("ERROR: in filewrite [%d]\r\n",err);

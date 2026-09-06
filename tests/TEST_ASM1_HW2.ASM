@@ -80,4 +80,7 @@ LAB_10:                 ; simple loop take 2*16 cycles
         JP LAB_13       ; if A<16 - loop
         RC
 
-        JP MAIN_LOOP
+        NOP             ; 64 byte
+        NOP
+
+        JMP MAIN_LOOP

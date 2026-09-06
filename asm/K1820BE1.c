@@ -89,13 +89,13 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
         }
         i++;
     }
-    if (i>=n) { return 1; }
+    if (i>=n) { return K1820BE1_ERROR_CMD_NOT_FOUND; }
     // printf("info : asm (2) \"%s\"\r\n",K1820BE1_instructions[i].name);
     ln->szcmd = 1;
     if (K1820BE1_instructions[i].high) { ln->szcmd++; }
     ln->cmd = (((uint32_t)K1820BE1_instructions[i].high)<<8) | (K1820BE1_instructions[i].code);
     int mask=K1820BE1_instructions[i].mask;
-    int arg1,arg2,err;
+    int arg1,arg2,err,ret_err = 0;
     if (K1820BE1_instructions[i].op) {
         printf("info : asm (3) it is need arg\r\n");
         if (K1820BE1_instructions[i].op == 'd') { // find ',' and get arg1 and arg2
@@ -107,13 +107,13 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
             err = numberTryGet(ln->line + ln->argS, j- ln->argS, &arg1, numberVoid);
             if (err) { err = equGet(ln->line + ln->argS, j- ln->argS, &arg1); }
             if (err) { err = labelGet(ln->line + ln->argS, j- ln->argS, &arg1); }
-            if (err) { return 2; }
-            if ((arg1<0) || (arg1>3)) { return 3; }
+            if (err) { ret_err |= K1820BE1_ERROR_ARG1_FOR_D_CANNOT_GET; }
+            if ((arg1<0) || (arg1>3)) { ret_err |= K1820BE1_ERROR_ARG1_FOR_D_WRONG; }
             err = numberTryGet(ln->line + j + 1, ln->argE - j - 1, &arg2, numberVoid);
             if (err) { err = equGet(ln->line + j + 1, ln->argE - j - 1, &arg2); }
             if (err) { err = labelGet(ln->line + j + 1, ln->argE - j - 1, &arg2); }
-            if (err) { return 4; }
-            if ((arg2<0) || (arg2>15)) { return 5; }
+            if (err) { ret_err |= K1820BE1_ERROR_ARG2_FOR_D_CANNOT_GET; }
+            if ((arg2<0) || (arg2>15)) { ret_err |= K1820BE1_ERROR_ARG2_FOR_D_WRONG; }
             if (i==38) { // LBI
                 if ((arg2 == 0) || (arg2 > 8)) {
                     ln->szcmd = 1;
@@ -127,33 +127,44 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
             }
         } else { // try to get arg1
             err = numberTryGet(ln->line + ln->argS, ln->argE - ln->argS, &arg1, numberVoid);
+            printf("arg1 = %d\r\n",arg1);
             if (err) { err = equGet(ln->line + ln->argS, ln->argE - ln->argS, &arg1); }
+            printf("arg1 = %d\r\n",arg1);
             if (err) { err = labelGet(ln->line + ln->argS, ln->argE - ln->argS, &arg1); }
-            if (err) { return 6; }
-            if (arg1<0) { return 7; }
-            if (i == 13) { // JP
+            printf("arg1 = %d\r\n",arg1);
+            if (err) { ret_err |= K1820BE1_ERROR_ARG1_FOR_ALL_CANNOT_GET; }
+            printf("arg1 = %d\r\n",arg1);
+            if (arg1<0) { ret_err |= K1820BE1_ERROR_ARG1_FOR_ALL_WRONG; }
+            // JP:
+            // if addr = [0x80-0xff] -> dist = 0x80-0xfe
+            // if addr = [0x0-0x7f] || [0x100-0x3ff] -> dist = 0x0-0x3e + addr&0x3c0
+            if (i == 13) {
                 if ((ln->address < 0x80) || (ln->address >= 0x100)) {
                     mask >>= 1;
                     ln->cmd |= 0x40;
                 }
                 if ((arg1&(~mask)) != (ln->address&(~mask))) {
-                    return 8;
+                    ret_err |= K1820BE1_ERROR_JP_TRY_GO_ANOTHER_PAGE;
+                }
+                if (arg1 == mask) {
+                    ret_err |= K1820BE1_ERROR_JP_TRY_GO_AT_END_PAGE;
                 }
                 ln->cmd |= (arg1&mask);
             } else {
                 if (i == 14) { // JSRP
-                    if ((ln->address >= 0x80) || (ln->address < 0x100)) {
-                        return 9;
+                    printf("address = %d\r\n",ln->address);
+                    if ((ln->address >= 0x80) && (ln->address < 0x100)) {
+                        ret_err |= K1820BE1_ERROR_JSRP_TRY_CALL_FROM_2_OR_3_PAGE;
                     }
-                    if ((arg1 >= 0x80) || (arg1 < 0xff)) {
-                        return 10;
+                    if ((arg1 < 0x80) || (arg1 > 0xfe)) {
+                        ret_err |= K1820BE1_ERROR_JSRP_TRY_GO_TO_NOT_2_OR_3_PAGE;
                     }
                     ln->cmd |= (arg1&mask);
                 } else {
                     if ((K1820BE1_instructions[i].op >= '0')\
                     && (K1820BE1_instructions[i].op <= '3')) {
                         if (arg1 > 3) {
-                            return 11;
+                            ret_err |= K1820BE1_ERROR_CMD_WITH_ARG_0123;
                         } else {
                             i += arg1;
                             ln->cmd = K1820BE1_instructions[i].code;
@@ -161,13 +172,13 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
                     } else {
                         if (K1820BE1_instructions[i].op == 'r') {
                             if (arg1>3) {
-                                return 12;
+                                ret_err |= K1820BE1_ERROR_CMD_WITH_ARG_R;
                             } else {
                                 ln->cmd |= (arg1<<4);
                             }
                         } else { // a or y no special functions
                             if (arg1 > K1820BE1_instructions[i].mask) {
-                                return 13;
+                                ret_err |= K1820BE1_ERROR_CMD_WITH_ARG_A_OR_Y;
                             } else {
                                 ln->cmd |= arg1;
                             }
@@ -177,19 +188,20 @@ int K1820BE1DecodeInstruction(struct lines_t *ln) {
             }
         }
     }
+    // printf("info : asm(5) size cmd =%d\r\n",ln->szcmd);
     if (ln->szcmd == 1) {
         printf("info : asm (4) addr=0x%03x code=0x%02x\r\n",ln->address, ln->cmd);
         if (ln->next != NULL) {
             ln->next->address = ln->address + ln->szcmd;
         }
-        return 0;
+        return ret_err;
     }
     if (ln->szcmd == 2) {
         printf("info : asm (4) addr=0x%03x code=0x%04x\r\n",ln->address, ln->cmd);
         if (ln->next != NULL) {
             ln->next->address = ln->address + ln->szcmd;
         }
-        return 0;
+        return ret_err;
     }
-    return 14;
+    return ret_err | K1820BE1_ERROR_UNEXPECTED;
 }

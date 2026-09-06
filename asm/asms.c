@@ -16,12 +16,15 @@ int asmAssembly(fun_asm_t fun) {
                     printf("info : asm set first address\r\n");
                 }
             }
+            int not_rdy = 0;
             if (ln->szcmd < 0) {
-                // printf("size of word %d\r\n",ln->word1E - ln->word1S);
+                printf("size of word %d\r\n",ln->word1E - ln->word1S);
                 if (ln->word1E - ln->word1S == 0) {
                     ln->szcmd = 0;
                 } else {
-                    if (fun(ln)) {
+                    not_rdy = fun(ln);
+                    printf("asmAssembly error=%d\r\n",not_rdy);
+                    if (not_rdy) {
                         need_asm_count++;
                     } else {
                         asm_count++;
@@ -34,8 +37,12 @@ int asmAssembly(fun_asm_t fun) {
                     printf("info : asm set next address\r\n");
                 }
             }
+            if (not_rdy) {
+                ln->szcmd = -1;
+            }
             ln = ln->next;
         }
+        // printf("need_asm_count=%d, asm_count=%d\r\n",need_asm_count,asm_count);
         if (need_asm_count == 0) { return 0; }
         if (asm_count == 0) { return 1; }
     }
