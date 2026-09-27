@@ -122,7 +122,7 @@ printf "mcu test [ 2]: blink at G0 ...\t"
 [ $(./K1820BE1 TEST_ASM1_HW2.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
 printf "mcu test [ 3]: try to realize keyboard controller ...\t"
-[ $(./K1820BE1 TEST_ASM1_HW3.ASM | grep ".*ERROR.*" | wc -l) -gt 0 ] \
+[ $(./K1820BE1 TEST_ASM1_HW3.ASM | grep ".*ERROR.*" | wc -l) -eq 0 ] \
     && echo -e "\033[1;32mOK\033[0m" || echo -e "\033[1;31mERROR\033[0m"
 
 cd -
